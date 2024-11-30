@@ -1,42 +1,58 @@
 package com.jennyduarte.sis.entity;
 import jakarta.persistence.*;
-import lombok.Data;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import lombok.*;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Data
-@EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "productos")
 public class Producto {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
+    private String codigoProducto; // Código único del producto
+
+    @Column(nullable = false)
     private String nombre;
 
     private String descripcion;
 
-    private double precio;
+    @ManyToOne
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private Categoria categoria;
 
-    private int cantidadDisponible;
+    @ManyToOne
+    @JoinColumn(name = "contacto_proveedor_id")
+    private Contacto proveedor;
+
+    @ManyToOne
+    @JoinColumn(name = "temporada_id")
+    private Temporada temporada;
 
     @Enumerated(EnumType.STRING)
-    private TipoProducto tipo;
-    private String imagen; // Campo para almacenar la URL de la imagen
+    @Column(nullable = false)
+    private TipoProducto tipo; // Enum: venta, alquiler, personalizado
 
-    @CreatedDate
-    private LocalDateTime fechaCreacion;
+    @Enumerated(EnumType.STRING)
+    private EstadoProducto estado = EstadoProducto.DISPONIBLE;
 
-    @LastModifiedDate
-    private LocalDateTime fechaUltimaModificacion;
+    private BigDecimal precioVenta;
+    private BigDecimal costoAlquiler;
+    private Integer cantidadDisponible;
 
-    public enum TipoProducto {
-        VENTA,
-        ALQUILER,
-        PERSONALIZADO
+    @Column(nullable = true)
+    private String imagenUrl; // URL de la imagen del producto
+
+    public enum TipoProducto{
+        venta, alquiler, personalizado
+    }
+    public enum EstadoProducto{
+        VENTA,ALQUILER, DISPONIBLE, PERZONALIZADO
     }
 }
