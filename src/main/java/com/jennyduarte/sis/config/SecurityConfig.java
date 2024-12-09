@@ -31,9 +31,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/resources/**").permitAll() // Permitir acceso al login
-                        .requestMatchers("/dashboard/**").hasAnyRole("ADMIN", "VENDEDOR")
-                        .requestMatchers("/productos/**").hasRole("ADMIN")
+                        .requestMatchers("/login","/error","/css/**","/layout/**", "/js/**","/resources/**").permitAll() // Permitir acceso al login
+                        .requestMatchers("/","/dashboard/**").hasAnyRole("ADMINISTRADOR","ADMIN", "VENDEDOR")
+                        .requestMatchers("/**").hasRole("ADMINISTRADOR")
                         .anyRequest().authenticated() // Requiere autenticación para otras rutas
                 )
                 .formLogin(form -> form

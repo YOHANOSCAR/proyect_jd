@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class CategoriaController extends BaseController<Categoria, Long> {
 
     public CategoriaController(CategoriaService categoriaService) {
-        super(categoriaService, "dashboard");
+        super(categoriaService, "categorias");
     }
 
     @Override

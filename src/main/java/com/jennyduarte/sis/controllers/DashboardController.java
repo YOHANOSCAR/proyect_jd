@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class DashboardController {
 
+    @GetMapping("/")
+    public String redirigirAlDashboard() {
+        return "redirect:/dashboard"; // Redirige a /dashboard
+    }
     @GetMapping("/dashboard")
     public String mostrarDashboard(Model model) {
         model.addAttribute("mensaje", "Bienvenido al Dashboard");
