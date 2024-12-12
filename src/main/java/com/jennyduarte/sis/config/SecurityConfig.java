@@ -31,21 +31,24 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login","/error","/css/**","/layout/**", "/js/**","/resources/**").permitAll() // Permitir acceso al login
-                        .requestMatchers("/","/dashboard/**").hasAnyRole("ADMINISTRADOR","ADMIN", "VENDEDOR")
-                        .requestMatchers("/**").hasRole("ADMINISTRADOR")
-                        .anyRequest().authenticated() // Requiere autenticación para otras rutas
+                        .requestMatchers("/login", "/error", "/css/**", "/layout/**", "/js/**", "/registro", "/resources/**").permitAll() // Recursos públicos
+                        .requestMatchers("/contactos/**", "/dashboard/**").permitAll()
+                        .requestMatchers("/").hasAnyRole("ADMINISTRADOR", "ADMIN", "VENDEDOR") // Acceso a Dashboard
+                        .anyRequest().hasRole("ADMINISTRADOR") // Todas las demás rutas requieren ADMINISTRADOR
                 )
                 .formLogin(form -> form
-                        .loginPage("/login") // Configurar la página de login
-                        .defaultSuccessUrl("/dashboard", true) // Redirección tras login exitoso
-                        .permitAll() // Permitir acceso al login
+                        .loginPage("/login") // Página personalizada de login
+                        .defaultSuccessUrl("/dashboard", true) // Redirige al dashboard tras login exitoso
+                        .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout") // Redirección tras logout
+                        .logoutSuccessUrl("/login?logout") // Redirige a login tras logout
                         .permitAll()
                 );
         return http.build();
     }
+
+
+
 }

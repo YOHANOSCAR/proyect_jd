@@ -29,13 +29,17 @@ public class UsuarioService implements UserDetailsService {
 
         return User.builder()
                 .username(usuario.getUsername())
-                .password(usuario.getPassword())
-                .roles(usuario.getRol().name())
+                .password(usuario.getPassword()) // Contraseña encriptada
+                .roles("ROLE_" + usuario.getRol()) // Concatenamos ROLE_
                 .build();
     }
+
+
+
 
     public Usuario guardarUsuario(Usuario usuario) {
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return usuarioRepository.save(usuario);
     }
+
 }
