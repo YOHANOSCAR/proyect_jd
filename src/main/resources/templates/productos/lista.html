@@ -2,33 +2,50 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Lista de Productos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<h1>Productos</h1>
-<a href="/productos/crear">Crear Producto</a>
-<table border="1" cellspacing="0" cellpadding="5">
-    <tr>
-        <th>Nombre</th>
-        <th>Descripción</th>
-        <th>Precio</th>
-        <th>Cantidad</th>
-        <th>Imagen</th>
-        <th>Acciones</th>
-    </tr>
-    <tr th:each="producto : ${productos}">
-        <td th:text="${producto.nombre}"></td>
-        <td th:text="${producto.descripcion}"></td>
-        <td th:text="${producto.precio}"></td>
-        <td th:text="${producto.cantidadDisponible}"></td>
-        <td>
-            <img th:if="${producto.imagen}" th:src="@{/images/{imagen}(imagen=${producto.imagen})}" alt="Imagen del Producto" style="max-width: 100px;">
-            <span th:if="${producto.imagen == null}">Sin imagen</span>
-        </td>
-        <td>
-            <a th:href="@{/productos/editar/{id}(id=${producto.id})}">Editar</a>
-            <a th:href="@{/productos/eliminar/{id}(id=${producto.id})}">Eliminar</a>
-        </td>
-    </tr>
-</table>
+<div class="container mt-5">
+    <h1>Lista de Productos</h1>
+    <a href="/productos/crear" class="btn btn-primary mb-3">Nuevo Producto</a>
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Proveedor</th>
+            <th>Temporada</th>
+            <th>Precio Venta</th>
+            <th>Costo Alquiler</th>
+            <th>Estado</th>
+            <th>Imagen</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="producto : ${productos}">
+            <td th:text="${producto.id}"></td>
+            <td th:text="${producto.codigoProducto}"></td>
+            <td th:text="${producto.nombre}"></td>
+            <td th:text="${producto.categoria.nombre}"></td>
+            <td th:text="${producto.proveedor.nombre}"></td>
+            <td th:text="${producto.temporada.nombre}"></td>
+            <td th:text="${producto.precioVenta}"></td>
+            <td th:text="${producto.costoAlquiler}"></td>
+            <td th:text="${producto.estado}"></td>
+            <td>
+                <!-- Mostrar imagen del producto -->
+                <img th:src="@{'/images/' + ${producto.imagenUrl}}" alt="Imagen del producto" class="img-thumbnail" style="width: 100px; height: auto;">
+            </td>
+            <td>
+                <a th:href="@{/productos/editar/{id}(id=${producto.id})}" class="btn btn-warning btn-sm">Editar</a>
+                <a th:href="@{/productos/eliminar/{id}(id=${producto.id})}" class="btn btn-danger btn-sm">Eliminar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 </body>
 </html>

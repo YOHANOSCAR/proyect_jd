@@ -1,35 +1,110 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Formulario de Producto</title>
+    <title th:text="${producto.id != null ? 'Editar Producto' : 'Crear Producto'}"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<h1>Formulario de Producto</h1>
-<form th:action="@{/productos}" th:object="${producto}" method="post" enctype="multipart/form-data">
-    <input type="hidden" th:field="*{id}" />
+<div class="container mt-5">
+    <h1 th:text="${producto.id != null ? 'Editar Producto' : 'Crear Producto'}"></h1>
+    <form th:action="@{/productos}" th:object="${producto}" method="post" enctype="multipart/form-data">
+        <input type="hidden" th:field="*{id}" />
+        <!-- Código del Producto -->
+        <div class="mb-3">
+            <label for="codigoProducto" class="form-label">Código del Producto</label>
+            <input type="text" id="codigoProducto" name="codigoProducto" th:field="*{codigoProducto}" class="form-control" required>
+        </div>
 
-    <label for="nombre">Nombre:</label>
-    <input type="text" id="nombre" th:field="*{nombre}" required/>
+        <!-- Nombre -->
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" id="nombre" name="nombre" th:field="*{nombre}" class="form-control" required>
+        </div>
 
-    <label for="descripcion">Descripción:</label>
-    <input type="text" id="descripcion" th:field="*{descripcion}" required/>
+        <!-- Descripción -->
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea id="descripcion" name="descripcion" th:field="*{descripcion}" class="form-control"></textarea>
+        </div>
 
-    <label for="precio">Precio:</label>
-    <input type="number" id="precio" th:field="*{precio}" required/>
+        <!-- Categoría -->
+        <div class="mb-3">
+            <label for="categoria" class="form-label">Categoría</label>
+            <select id="categoria" name="categoria.id" th:field="*{categoria.id}" class="form-select" required>
+                <option th:each="categoria : ${categorias}" th:value="${categoria.id}" th:text="${categoria.nombre}"></option>
+            </select>
+        </div>
 
-    <label for="cantidadDisponible">Cantidad:</label>
-    <input type="number" id="cantidadDisponible" th:field="*{cantidadDisponible}" required/>
+        <!-- Proveedor -->
+        <div class="mb-3">
+            <label for="proveedor" class="form-label">Proveedor </label>
+            <    <select id="proveedor" name="proveedor.id" class="form-control" th:field="*{proveedor}">
+            <option value="" disabled selected>Selecciona un proveedor</option>
+            <option th:each="proveedor : ${proveedores}"
+                    th:value="${proveedor.id}"
+                    th:text="${proveedor.nombre}">
+            </option>
+        </select>
+        </div>
 
-    <label for="archivoImagen">Imagen:</label>
-    <input type="file" id="archivoImagen" name="archivoImagen"/>
+        <!-- Temporada -->
+        <div class="mb-3">
+            <label for="temporada" class="form-label">Temporada</label>
+            <select id="temporada" name="temporada.id" th:field="*{temporada.id}" class="form-select">
+                <option th:each="temporada : ${temporadas}" th:value="${temporada.id}" th:text="${temporada.nombre}"></option>
+            </select>
+        </div>
 
-    <!-- Muestra la imagen actual si existe -->
-    <div th:if="${producto.imagen}">
-        <p>Imagen actual:</p>
-        <img th:src="@{/images/{imagen}(imagen=${producto.imagen})}" alt="Imagen del Producto" style="max-width: 200px;">
-    </div>
+        <!-- Tipo de Producto -->
+        <div class="mb-3">
+            <label for="tipo" class="form-label">Tipo de Producto</label>
+            <select id="tipo" name="tipo" th:field="*{tipo}" class="form-select" required>
+                <option th:each="tipo : ${T(com.jennyduarte.sis.entity.Producto.TipoProducto).values()}"
+                        th:value="${tipo}"
+                        th:text="${tipo}"></option>
+            </select>
+        </div>
 
-    <button type="submit">Guardar</button>
-</form>
+        <!-- Estado -->
+        <div class="mb-3">
+            <label for="estado" class="form-label">Estado</label>
+            <select id="estado" name="estado" th:field="*{estado}" class="form-select" required>
+                <option th:each="estado : ${T(com.jennyduarte.sis.entity.Producto.EstadoProducto).values()}"
+                        th:value="${estado}"
+                        th:text="${estado}"></option>
+            </select>
+        </div>
+
+        <!-- Precio de Venta -->
+        <div class="mb-3">
+            <label for="precioVenta" class="form-label">Precio de Venta</label>
+            <input type="number" id="precioVenta" name="precioVenta" th:field="*{precioVenta}" class="form-control" step="0.01">
+        </div>
+
+        <!-- Costo de Alquiler -->
+        <div class="mb-3">
+            <label for="costoAlquiler" class="form-label">Costo de Alquiler</label>
+            <input type="number" id="costoAlquiler" name="costoAlquiler" th:field="*{costoAlquiler}" class="form-control" step="0.01">
+        </div>
+
+        <!-- Cantidad Disponible -->
+        <div class="mb-3">
+            <label for="cantidadDisponible" class="form-label">Cantidad Disponible</label>
+            <input type="number" id="cantidadDisponible" name="cantidadDisponible" th:field="*{cantidadDisponible}" class="form-control" required>
+        </div>
+
+        <!-- Imagen -->
+        <div class="mb-3">
+            <label for="archivoImagen" class="form-label">Imagen del Producto</label>
+            <input type="file" id="archivoImagen" name="archivoImagen" class="form-control">
+            <div th:if="${producto.imagenUrl != null}">
+                <p>Imagen actual:</p>
+                <img th:src="@{/imagenes/{imagen}(imagen=${producto.imagenUrl})}" alt="Imagen actual" width="150">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </form>
+</div>
 </body>
 </html>

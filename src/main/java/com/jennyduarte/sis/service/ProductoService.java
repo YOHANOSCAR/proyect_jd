@@ -6,6 +6,7 @@ import com.jennyduarte.sis.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductoService {
@@ -40,5 +41,19 @@ public class ProductoService {
     public void eliminar(Long id) {
         Producto producto = obtenerPorId(id);
         productoRepository.delete(producto);
+    }
+
+    // Filtrar productos por proveedor
+    public List<Producto> listarPorProveedor(Long proveedorId) {
+        return productoRepository.findAll().stream()
+                .filter(producto -> producto.getProveedor() != null && producto.getProveedor().getId().equals(proveedorId))
+                .collect(Collectors.toList());
+    }
+
+    // Filtrar productos por categoría
+    public List<Producto> listarPorCategoria(Long categoriaId) {
+        return productoRepository.findAll().stream()
+                .filter(producto -> producto.getCategoria() != null && producto.getCategoria().getId().equals(categoriaId))
+                .collect(Collectors.toList());
     }
 }

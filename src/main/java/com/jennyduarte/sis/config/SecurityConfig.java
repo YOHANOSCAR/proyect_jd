@@ -31,24 +31,23 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/error", "/css/**", "/layout/**", "/js/**", "/registro", "/resources/**").permitAll() // Recursos públicos
-                        .requestMatchers("/contactos/**", "/dashboard/**").permitAll()
-                        .requestMatchers("/").hasAnyRole("ADMINISTRADOR", "ADMIN", "VENDEDOR") // Acceso a Dashboard
-                        .anyRequest().hasRole("ADMINISTRADOR") // Todas las demás rutas requieren ADMINISTRADOR
+                        .requestMatchers("/login", "/error", "/css/**", "/layout/**", "/js/**", "/registro", "/resources/**", "/contactos/**", "/usuarios/**", "productos/**" ).permitAll()
+                        .requestMatchers("/dashboard/**").hasAnyRole("ADMINISTRADOR", "VENDEDOR") // Roles sin prefijo
+                        .anyRequest().hasRole("ADMINISTRADOR") // Solo ADMINISTRADOR puede acceder a otras rutas
                 )
                 .formLogin(form -> form
-                        .loginPage("/login") // Página personalizada de login
-                        .defaultSuccessUrl("/dashboard", true) // Redirige al dashboard tras login exitoso
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout") // Redirige a login tras logout
+                        .logoutSuccessUrl("/login?logout")
+                        .clearAuthentication(true)
                         .permitAll()
                 );
         return http.build();
     }
-
 
 
 }

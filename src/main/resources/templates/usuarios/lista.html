@@ -8,7 +8,7 @@
 <div class="container mt-5">
     <h1>Lista de Usuarios</h1>
     <a href="/usuarios/crear" class="btn btn-primary mb-3">Nuevo Usuario</a>
-    <table class="table">
+    <table class="table table-bordered table-striped">
         <thead>
         <tr>
             <th>ID</th>
@@ -20,7 +20,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="usuario : ${entidades}">
+        <tr th:each="usuario : ${usuarios}">
             <td th:text="${usuario.id}"></td>
             <td th:text="${usuario.contacto.nombre}"></td>
             <td th:text="${usuario.username}"></td>

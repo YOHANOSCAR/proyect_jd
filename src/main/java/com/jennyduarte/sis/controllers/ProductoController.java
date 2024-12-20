@@ -1,7 +1,13 @@
 package com.jennyduarte.sis.controllers;
 
+import com.jennyduarte.sis.entity.Categoria;
+import com.jennyduarte.sis.entity.Contacto;
 import com.jennyduarte.sis.entity.Producto;
+import com.jennyduarte.sis.entity.Temporada;
+import com.jennyduarte.sis.service.CategoriaService;
+import com.jennyduarte.sis.service.ContactoService;
 import com.jennyduarte.sis.service.ProductoService;
+import com.jennyduarte.sis.service.TemporadaService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,12 +24,21 @@ import java.nio.file.Paths;
 public class ProductoController {
 
     private final ProductoService productoService;
+    private final CategoriaService categoriaService;
+    private final ContactoService contactoService;
+    private final TemporadaService temporadaService;
 
-    @Value("${ruta.imagenes}") // Ruta configurada para las imágenes
+    @Value("${ruta.imagenes}") // Ruta configurada para guardar imágenes
     private String rutaImagenes;
 
-    public ProductoController(ProductoService productoService) {
+    public ProductoController(ProductoService productoService,
+                              CategoriaService categoriaService,
+                              ContactoService contactoService,
+                              TemporadaService temporadaService) {
         this.productoService = productoService;
+        this.categoriaService = categoriaService;
+        this.contactoService = contactoService;
+        this.temporadaService = temporadaService;
     }
 
     // Listar productos
@@ -37,27 +52,23 @@ public class ProductoController {
     @GetMapping("/crear")
     public String crearProductoForm(Model model) {
         model.addAttribute("producto", new Producto());
+        model.addAttribute("categorias", categoriaService.listarTodos());
+        model.addAttribute("proveedores", contactoService.listarProveedores()); // Solo proveedores
+        model.addAttribute("temporadas", temporadaService.listarTodos());
         return "productos/formulario";
     }
 
     // Guardar o actualizar un producto
     @PostMapping
     public String guardarProducto(@ModelAttribute Producto producto,
-                                  @RequestParam("archivoImagen") MultipartFile archivoImagen) {
+                                  @RequestParam(value = "archivoImagen", required = false) MultipartFile archivoImagen) {
         try {
-            // Si hay una imagen nueva
-            if (!archivoImagen.isEmpty()) {
-                // Formatear el nombre del producto para usarlo como nombre del archivo
-                String nombreProducto = producto.getNombre()
-                        .trim()
-                        .replaceAll(" ", "_")
-                        .replaceAll("[^a-zA-Z0-9_]", ""); // Elimina caracteres especiales
-                String extension = archivoImagen.getOriginalFilename()
-                        .substring(archivoImagen.getOriginalFilename().lastIndexOf('.'));
-                String nombreArchivo = nombreProducto + "_" + System.currentTimeMillis() + extension;
+            if (archivoImagen != null && !archivoImagen.isEmpty()) {
+                // Generar un nombre único para la imagen
+                String nombreArchivo = System.currentTimeMillis() + "_" + archivoImagen.getOriginalFilename();
                 Path rutaArchivo = Paths.get(rutaImagenes, nombreArchivo);
 
-                // Eliminar imagen antigua si está editando el producto
+                // Si está editando un producto, eliminar la imagen anterior si existe
                 if (producto.getId() != null) {
                     Producto productoExistente = productoService.obtenerPorId(producto.getId());
                     if (productoExistente.getImagenUrl() != null) {
@@ -66,15 +77,17 @@ public class ProductoController {
                     }
                 }
 
-                // Guardar la imagen en el sistema de archivos
+                // Guardar la nueva imagen en el sistema de archivos
                 archivoImagen.transferTo(rutaArchivo.toFile());
-                producto.setImagenUrl(nombreArchivo); // Asocia el archivo al producto
+                producto.setImagenUrl(nombreArchivo); // Asignar la URL de la nueva imagen al producto
+            } else if (producto.getId() != null) {
+                // Si no se sube una imagen nueva durante la edición, mantener la imagen anterior
+                Producto productoExistente = productoService.obtenerPorId(producto.getId());
+                producto.setImagenUrl(productoExistente.getImagenUrl());
             }
 
-            // Guardar el producto en la base de datos
             productoService.guardar(producto);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new RuntimeException("Error al manejar la imagen: " + e.getMessage());
         }
         return "redirect:/productos";
@@ -85,6 +98,9 @@ public class ProductoController {
     public String editarProductoForm(@PathVariable Long id, Model model) {
         Producto producto = productoService.obtenerPorId(id);
         model.addAttribute("producto", producto);
+        model.addAttribute("categorias", categoriaService.listarTodos());
+        model.addAttribute("proveedores", contactoService.listarProveedores()); // Solo proveedores
+        model.addAttribute("temporadas", temporadaService.listarTodos());
         return "productos/formulario";
     }
 
@@ -97,9 +113,8 @@ public class ProductoController {
                 Path rutaImagen = Paths.get(rutaImagenes, producto.getImagenUrl());
                 Files.deleteIfExists(rutaImagen); // Elimina la imagen asociada
             }
-            productoService.eliminar(id); // Elimina el producto
+            productoService.eliminar(id); // Elimina el producto de la base de datos
         } catch (IOException e) {
-            e.printStackTrace();
             throw new RuntimeException("Error al eliminar la imagen: " + e.getMessage());
         }
         return "redirect:/productos";

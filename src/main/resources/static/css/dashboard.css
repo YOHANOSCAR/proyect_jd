@@ -1,0 +1,35 @@
+body {
+    min-height: 100vh;
+}
+
+.sidebar {
+    min-height: 100vh;
+    border-right: 1px solid #ddd;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+}
+
+.card-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.card-stats .card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.card-stats .card-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.sidebar .nav-link.active {
+    font-weight: bold;
+    background-color: #e9ecef;
+}
