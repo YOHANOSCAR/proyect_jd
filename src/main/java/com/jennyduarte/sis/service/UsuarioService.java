@@ -62,4 +62,12 @@ public class UsuarioService implements UserDetailsService {
         }
         usuarioRepository.deleteById(id);
     }
+    public Usuario obtenerPorUsername(String username) {
+        return usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con username: " + username));
+    }
+
+
+
+
 }

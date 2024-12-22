@@ -31,12 +31,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/error", "/css/**", "/layout/**", "/js/**", "/registro", "/resources/**", "/contactos/**", "/usuarios/**", "productos/**" ).permitAll()
-                        .requestMatchers("/dashboard/**").hasAnyRole("ADMINISTRADOR", "VENDEDOR") // Roles sin prefijo
-                        .anyRequest().hasRole("ADMINISTRADOR") // Solo ADMINISTRADOR puede acceder a otras rutas
+                        .requestMatchers("/login", "/error", "/css/**", "/layout/**",
+                                "/js/**", "/registro", "/resources/**",
+                                "/contactos/**", "/usuarios/**", "/productos/**"
+                        ).permitAll()
+                        .requestMatchers("/dashboard/**").hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+                        .anyRequest().hasRole("ADMINISTRADOR")
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
+                        .loginProcessingUrl("/login") // <-- Asegurarse de especificarlo
                         .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
@@ -48,6 +52,7 @@ public class SecurityConfig {
                 );
         return http.build();
     }
+
 
 
 }

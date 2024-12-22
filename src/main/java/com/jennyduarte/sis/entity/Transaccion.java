@@ -1,4 +1,5 @@
 package com.jennyduarte.sis.entity;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,8 +18,12 @@ public class Transaccion {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "contacto_cliente_id")
+    @JoinColumn(name = "contacto_cliente_id", nullable = false)
     private Contacto cliente;
+
+    @ManyToOne
+    @JoinColumn(name = "vendedor_id", nullable = false)
+    private Usuario vendedor; // Nuevo atributo para asociar al vendedor
 
     @Column(nullable = false)
     private LocalDateTime fecha;
@@ -40,11 +45,12 @@ public class Transaccion {
     private BigDecimal saldo;
 
     private String notas;
-    public enum TipoTransaccion{
-       VENTA, ALQUILER
-    }
-    public enum EstadoTransaccion{
-        PENDIENTE, COMPLETADA, CANCELADA
+
+    public enum TipoTransaccion {
+        VENTA, ALQUILER
     }
 
+    public enum EstadoTransaccion {
+        PENDIENTE, COMPLETADA, CANCELADA
+    }
 }

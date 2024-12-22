@@ -19,4 +19,10 @@ public class ContactoService extends BaseService<Contacto, Long> {
                 .filter(contacto -> contacto.getTipo() == Contacto.TipoContacto.PROVEEDOR)
                 .collect(Collectors.toList());
     }
+    public List<Contacto> listarClientes() {
+        return listarTodos().stream()
+                .filter(contacto -> contacto.getTipo() == Contacto.TipoContacto.CLIENTE)
+                .collect(Collectors.toList());
+    }
+
 }

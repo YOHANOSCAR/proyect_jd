@@ -9,6 +9,6 @@ public class LoginController {
 
     @GetMapping("/login")
     public String mostrarLogin(Model model) {
-        return "login"; // Vista login.html
+        return "login"; // login.html
     }
 }
