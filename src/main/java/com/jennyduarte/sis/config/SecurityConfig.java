@@ -35,7 +35,7 @@ public class SecurityConfig {
                                 "/js/**", "/registro", "/resources/**",
                                 "/contactos/**", "/usuarios/**", "/productos/**"
                         ).permitAll()
-                        .requestMatchers("/dashboard/**").hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+                        .requestMatchers("/dashboard/**","/transacciones/**").hasAnyRole("ADMINISTRADOR", "VENDEDOR")
                         .anyRequest().hasRole("ADMINISTRADOR")
                 )
                 .formLogin(form -> form

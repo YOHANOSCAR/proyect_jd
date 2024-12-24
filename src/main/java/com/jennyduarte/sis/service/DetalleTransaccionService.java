@@ -8,8 +8,17 @@ import java.util.List;
 
 @Service
 public class DetalleTransaccionService extends BaseService<DetalleTransaccion, Long> {
+    private final DetalleTransaccionRepository detalleRepository;
+
     public DetalleTransaccionService(DetalleTransaccionRepository detalleRepository) {
         super(detalleRepository);
+        this.detalleRepository = detalleRepository;
     }
 
+    public List<DetalleTransaccion> listarPorTransaccion(Long transaccionId) {
+        return detalleRepository.findAll()
+                .stream()
+                .filter(detalle -> detalle.getTransaccion().getId().equals(transaccionId))
+                .toList();
+    }
 }

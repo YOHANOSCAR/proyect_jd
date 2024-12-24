@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -23,7 +24,7 @@ public class Transaccion {
 
     @ManyToOne
     @JoinColumn(name = "vendedor_id", nullable = false)
-    private Usuario vendedor; // Nuevo atributo para asociar al vendedor
+    private Usuario vendedor;
 
     @Column(nullable = false)
     private LocalDateTime fecha;
@@ -36,15 +37,19 @@ public class Transaccion {
     private EstadoTransaccion estado = EstadoTransaccion.PENDIENTE;
 
     @Column(nullable = false)
-    private BigDecimal total;
+    private BigDecimal total = BigDecimal.ZERO;
 
     @Column(nullable = false)
     private BigDecimal pagado = BigDecimal.ZERO;
 
-    @Transient
-    private BigDecimal saldo;
+    @OneToMany(mappedBy = "transaccion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetalleTransaccion> detalles;
 
     private String notas;
+
+    public BigDecimal getSaldo() {
+        return total.subtract(pagado);
+    }
 
     public enum TipoTransaccion {
         VENTA, ALQUILER
@@ -52,5 +57,15 @@ public class Transaccion {
 
     public enum EstadoTransaccion {
         PENDIENTE, COMPLETADA, CANCELADA
+    }
+
+    public void calcularTotal() {
+        if (detalles != null) {
+            this.total = detalles.stream()
+                    .map(DetalleTransaccion::getSubtotal)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        } else {
+            this.total = BigDecimal.ZERO;
+        }
     }
 }

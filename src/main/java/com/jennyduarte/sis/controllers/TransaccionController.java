@@ -13,113 +13,108 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
-@RequestMapping("/ventas")
+@RequestMapping("/transacciones")
 public class TransaccionController {
 
     private final TransaccionService transaccionService;
     private final DetalleTransaccionService detalleTransaccionService;
     private final ProductoService productoService;
     private final ContactoService contactoService;
-    private final HistorialInteraccionService historialInteraccionService;
-    private final UsuarioService usuarioService; // Inyección de UsuarioService
+    private final UsuarioService usuarioService;
+    private final PagoService pagoService;
 
     public TransaccionController(TransaccionService transaccionService,
                                  DetalleTransaccionService detalleTransaccionService,
                                  ProductoService productoService,
                                  ContactoService contactoService,
-                                 HistorialInteraccionService historialInteraccionService,
-                                 UsuarioService usuarioService) { // Agregado aquí
+                                 UsuarioService usuarioService,
+                                 PagoService pagoService) {
         this.transaccionService = transaccionService;
         this.detalleTransaccionService = detalleTransaccionService;
         this.productoService = productoService;
         this.contactoService = contactoService;
-        this.historialInteraccionService = historialInteraccionService;
-        this.usuarioService = usuarioService; // Inicialización aquí
+        this.usuarioService = usuarioService;
+        this.pagoService = pagoService;
     }
+
     @GetMapping
-    public String listarVentas(Model model) {
-        model.addAttribute("ventas", transaccionService.listarTodos());
-        return "ventas/lista";
+    public String listarTransacciones(Model model) {
+        List<Transaccion> transacciones = transaccionService.listarTodos();
+        model.addAttribute("transacciones", transacciones);
+        return "transacciones/lista";
     }
 
     @GetMapping("/crear")
-    public String crearVentaForm(Model model) {
-        Transaccion venta = new Transaccion();
+    public String crearTransaccionForm(Model model) {
+        Transaccion transaccion = new Transaccion();
 
-        // Obtener el usuario autenticado como vendedor
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName(); // Obtener el nombre de usuario autenticado
+        String username = auth.getName();
+        Usuario vendedor = usuarioService.obtenerPorUsername(username);
+        transaccion.setVendedor(vendedor);
 
-        Usuario vendedor = usuarioService.obtenerPorUsername(username); // Buscar al vendedor
-        venta.setVendedor(vendedor); // Asignar el vendedor autenticado a la transacción
-
-        // Configurar valores para el formulario
-        model.addAttribute("transaccion", venta);
-        model.addAttribute("clientes", contactoService.listarClientes()); // Lista filtrada de clientes
+        model.addAttribute("transaccion", transaccion);
+        model.addAttribute("clientes", contactoService.listarClientes());
         model.addAttribute("productos", productoService.listarTodos());
         model.addAttribute("tiposTransaccion", List.of(Transaccion.TipoTransaccion.VENTA.name(), Transaccion.TipoTransaccion.ALQUILER.name()));
-        model.addAttribute("estadosTransaccion", List.of(Transaccion.EstadoTransaccion.PENDIENTE.name(), Transaccion.EstadoTransaccion.COMPLETADA.name(), Transaccion.EstadoTransaccion.CANCELADA.name()));
+        model.addAttribute("metodosPago", List.of(Pago.MetodoPago.EFECTIVO.name(), Pago.MetodoPago.TARJETA.name(), Pago.MetodoPago.TRANSAFERENCIA.name()));
 
-        return "ventas/formulario";
+        return "transacciones/formulario";
     }
 
-
-
-
     @PostMapping
-    public String guardarVenta(@ModelAttribute Transaccion venta,
-                               @RequestParam("productoId") List<Long> productoIds,
-                               @RequestParam("cantidades") List<Integer> cantidades,
-                               @RequestParam("precios") List<BigDecimal> precios) {
+    public String guardarTransaccion(@ModelAttribute Transaccion transaccion,
+                                     @RequestParam("productoId") List<Long> productoIds,
+                                     @RequestParam("cantidades") List<Integer> cantidades,
+                                     @RequestParam("metodoPago") String metodoPago) {
 
-        // Calcular el total de la transacción
         BigDecimal total = BigDecimal.ZERO;
-        for (int i = 0; i < productoIds.size(); i++) {
-            total = total.add(precios.get(i).multiply(BigDecimal.valueOf(cantidades.get(i))));
-        }
 
-        // Establecer detalles de la transacción
-        venta.setFecha(LocalDateTime.now());
-        venta.setTotal(total);
-
-        // Guardar transacción
-        Transaccion transaccionGuardada = transaccionService.guardar(venta);
-
-        // Crear detalles de la transacción
         for (int i = 0; i < productoIds.size(); i++) {
             Producto producto = productoService.obtenerPorId(productoIds.get(i));
+            BigDecimal precio = transaccion.getTipo() == Transaccion.TipoTransaccion.VENTA
+                    ? producto.getPrecioVenta()
+                    : producto.getCostoAlquiler();
+            BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(cantidades.get(i)));
+
+            total = total.add(subtotal);
+
             DetalleTransaccion detalle = DetalleTransaccion.builder()
-                    .transaccion(transaccionGuardada)
+                    .transaccion(transaccion)
                     .producto(producto)
                     .cantidad(cantidades.get(i))
-                    .precioUnitario(precios.get(i))
+                    .precioUnitario(precio)
                     .build();
-            detalleTransaccionService.guardar(detalle);
 
-            // Registrar historial de interacción
-            HistorialInteraccion historial = HistorialInteraccion.builder()
-                    .cliente(venta.getCliente())
-                    .producto(producto)
-                    .tipo(HistorialInteraccion.TipoInteraccion.COMPRA)
-                    .fecha(LocalDateTime.now())
-                    .build();
-            historialInteraccionService.guardar(historial);
+            detalle.calcularSubtotal();
+            detalleTransaccionService.guardar(detalle);
         }
 
-        return "redirect:/ventas";
+        transaccion.setFecha(LocalDateTime.now());
+        transaccion.setTotal(total);
+        transaccionService.guardar(transaccion);
+
+        Pago pago = Pago.builder()
+                .transaccion(transaccion)
+                .monto(total)
+                .fechaPago(LocalDateTime.now())
+                .metodo(Pago.MetodoPago.valueOf(metodoPago))
+                .build();
+        pagoService.guardar(pago);
+
+        return "redirect:/transacciones";
     }
 
     @GetMapping("/{id}")
-    public String verDetallesVenta(@PathVariable Long id, Model model) {
+    public String verDetallesTransaccion(@PathVariable Long id, Model model) {
         Transaccion transaccion = transaccionService.obtenerPorId(id);
-        List<DetalleTransaccion> detalles = detalleTransaccionService.listarTodos()
-                .stream()
-                .filter(d -> d.getTransaccion().getId().equals(id))
-                .toList();
+        List<DetalleTransaccion> detalles = detalleTransaccionService.listarPorTransaccion(id);
+        List<Pago> pagos = pagoService.listarPorTransaccion(id);
 
-        model.addAttribute("venta", transaccion);
+        model.addAttribute("transaccion", transaccion);
         model.addAttribute("detalles", detalles);
+        model.addAttribute("pagos", pagos);
 
-        return "ventas/detalle";
+        return "transacciones/detalle";
     }
 }

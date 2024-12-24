@@ -25,10 +25,14 @@ public class PromocionPersonalizada {
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 
+    @Column(nullable = false)
     private BigDecimal descuento;
 
     private String mensaje;
 
     @Column(nullable = false)
     private LocalDateTime fechaCreacion;
+
+    @Column(nullable = false)
+    private Boolean activo = true; // Campo para determinar si la promoción está activa
 }

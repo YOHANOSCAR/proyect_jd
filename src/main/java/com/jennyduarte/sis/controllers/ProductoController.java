@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -119,4 +120,11 @@ public class ProductoController {
         }
         return "redirect:/productos";
     }
+    @GetMapping("/productos/precio/{id}/{tipo}")
+    @ResponseBody
+    public BigDecimal obtenerPrecioProducto(@PathVariable Long id, @PathVariable String tipo) {
+        Producto producto = productoService.obtenerPorId(id);
+        return tipo.equals("ALQUILER") ? producto.getCostoAlquiler() : producto.getPrecioVenta();
+    }
+
 }

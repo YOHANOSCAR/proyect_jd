@@ -21,10 +21,11 @@ public class ProductoService {
     public List<Producto> listarTodos() {
         List<Producto> productos = productoRepository.findAll();
         if (productos.isEmpty()) {
-            throw new RecursoNoEncontradoException("No hay productos disponibles.");
+            return List.of(); // Retorna una lista vacía
         }
         return productos;
     }
+
 
     // Obtener un producto por ID
     public Producto obtenerPorId(Long id) {

@@ -26,9 +26,18 @@ public class DetalleTransaccion {
     @Column(nullable = false)
     private Integer cantidad;
 
+    @Column(nullable = true)
+    private BigDecimal descuento = BigDecimal.ZERO;
+
     @Column(nullable = false)
     private BigDecimal precioUnitario;
 
     @Transient
     private BigDecimal subtotal;
+
+    public void calcularSubtotal() {
+        BigDecimal descuentoAplicado = precioUnitario.multiply(descuento.divide(BigDecimal.valueOf(100)));
+        this.subtotal = precioUnitario.subtract(descuentoAplicado).multiply(BigDecimal.valueOf(cantidad));
+    }
+
 }
