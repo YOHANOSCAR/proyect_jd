@@ -2,6 +2,8 @@ package com.jennyduarte.sis.service;
 
 import com.jennyduarte.sis.entity.Usuario;
 import com.jennyduarte.sis.repository.UsuarioRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -62,12 +64,20 @@ public class UsuarioService implements UserDetailsService {
         }
         usuarioRepository.deleteById(id);
     }
+
     public Usuario obtenerPorUsername(String username) {
         return usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con username: " + username));
     }
 
+    // **Obtener Usuario Autenticado**
+    public Usuario obtenerUsuarioAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("No hay un usuario autenticado.");
+        }
 
-
-
+        String username = authentication.getName();
+        return obtenerPorUsername(username);
+    }
 }

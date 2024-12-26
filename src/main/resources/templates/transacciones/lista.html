@@ -1,22 +1,33 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}">
+<html
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout}">
 <head>
-    <title>Lista de Transacciones</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Listado de Transacciones</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
 </head>
 <body>
+
 <section layout:fragment="contenido">
-    <div class="container mt-5">
-        <h1>Lista de Transacciones</h1>
-        <table class="table table-striped">
+    <div class="container mt-4">
+        <h1>Listado de Transacciones</h1>
+
+        <!-- Botón para crear nueva transacción -->
+        <div class="mb-3">
+            <a class="btn btn-primary" th:href="@{/transacciones/crear}">
+                Nueva Transacción
+            </a>
+        </div>
+
+        <!-- Tabla de transacciones -->
+        <table class="table table-bordered table-striped">
             <thead>
             <tr>
                 <th>ID</th>
+                <th>Fecha</th>
                 <th>Cliente</th>
                 <th>Vendedor</th>
-                <th>Fecha</th>
                 <th>Tipo</th>
                 <th>Estado</th>
                 <th>Total</th>
@@ -26,23 +37,27 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="transaccion : ${transacciones}">
-                <td th:text="${transaccion.id}"></td>
-                <td th:text="${transaccion.cliente.nombre}"></td>
-                <td th:text="${transaccion.vendedor.username}"></td>
-                <td th:text="${#dates.format(transaccion.fecha, 'dd/MM/yyyy HH:mm')}"></td>
-                <td th:text="${transaccion.tipo}"></td>
-                <td th:text="${transaccion.estado}"></td>
-                <td th:text="${transaccion.total}"></td>
-                <td th:text="${transaccion.pagado}"></td>
-                <td th:text="${transaccion.saldo}"></td>
+            <!-- Iteramos sobre la lista de transacciones que viene del modelo -->
+            <tr th:each="trans : ${transacciones}">
+                <td th:text="${trans.id}">1</td>
+                <td th:text="${#temporals.format(trans.fecha, 'yyyy-MM-dd HH:mm')}">2024-12-25 19:30</td>
+                <td th:text="${trans.cliente.nombre}">Nombre Cliente</td>
+                <td th:text="${trans.vendedor.contacto.nombre}">Nombre Vendedor</td>
+                <td th:text="${trans.tipo}">VENTA</td>
+                <td th:text="${trans.estado}">PENDIENTE</td>
+                <td th:text="${trans.total}">0.00</td>
+                <td th:text="${trans.pagado}">0.00</td>
+                <td th:text="${trans.saldo}">0.00</td>
                 <td>
-                    <a th:href="@{'/transacciones/' + ${transaccion.id}}" class="btn btn-info btn-sm">Ver</a>
+                    <!-- Ejemplo de acción para ver detalle -->
+                    <a th:href="@{/transacciones/{id}(id=${trans.id})}"
+                       class="btn btn-info btn-sm">Ver Detalle</a>
                 </td>
             </tr>
             </tbody>
         </table>
     </div>
 </section>
+
 </body>
 </html>

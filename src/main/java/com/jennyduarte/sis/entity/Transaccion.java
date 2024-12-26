@@ -2,7 +2,6 @@ package com.jennyduarte.sis.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,6 +13,7 @@ import java.util.List;
 @Builder
 @Table(name = "transacciones")
 public class Transaccion {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,12 +34,19 @@ public class Transaccion {
     private TipoTransaccion tipo;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private EstadoTransaccion estado = EstadoTransaccion.PENDIENTE;
 
     @Column(nullable = false)
+    @Builder.Default
     private BigDecimal total = BigDecimal.ZERO;
 
+    /**
+     * Aquí usamos @Builder.Default para que, si no le pasamos un valor a 'pagado'
+     * al usar el builder, se mantenga BigDecimal.ZERO en vez de null.
+     */
     @Column(nullable = false)
+    @Builder.Default
     private BigDecimal pagado = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "transaccion", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -51,14 +58,6 @@ public class Transaccion {
         return total.subtract(pagado);
     }
 
-    public enum TipoTransaccion {
-        VENTA, ALQUILER
-    }
-
-    public enum EstadoTransaccion {
-        PENDIENTE, COMPLETADA, CANCELADA
-    }
-
     public void calcularTotal() {
         if (detalles != null) {
             this.total = detalles.stream()
@@ -67,5 +66,13 @@ public class Transaccion {
         } else {
             this.total = BigDecimal.ZERO;
         }
+    }
+
+    public enum TipoTransaccion {
+        VENTA, ALQUILER
+    }
+
+    public enum EstadoTransaccion {
+        PENDIENTE, COMPLETADA, CANCELADA
     }
 }
