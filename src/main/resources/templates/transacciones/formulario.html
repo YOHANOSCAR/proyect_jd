@@ -49,6 +49,16 @@
                             th:value="${metodo}" th:text="${metodo}"></option>
                 </select>
             </div>
+            <div th:if="${mensaje}" class="alert alert-warning" role="alert">
+                <span th:text="${mensaje}"></span>
+            </div>
+            <!-- Campo adicional: Monto Inicial (Abono) -->
+            <div class="mb-3">
+                <label for="montoInicial" class="form-label">Monto Inicial Abonado</label>
+                <input type="number" step="0.01" id="montoInicial" name="montoInicial"
+                       class="form-control"
+                       placeholder="0.00" required>
+            </div>
 
             <!-- Productos Seleccionados -->
             <div class="mb-3">

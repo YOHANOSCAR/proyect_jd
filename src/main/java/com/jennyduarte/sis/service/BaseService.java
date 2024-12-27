@@ -1,5 +1,6 @@
 package com.jennyduarte.sis.service;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public abstract class BaseService<T, ID> {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Recurso con ID " + id + " no encontrado."));
     }
-
+    @Transactional
     public T guardar(T entidad) {
         return repository.save(entidad);
     }
