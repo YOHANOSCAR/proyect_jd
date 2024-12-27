@@ -17,7 +17,6 @@ public class TransaccionService extends BaseService<Transaccion, Long> {
         this.transaccionRepository = transaccionRepository;
     }
 
-
     public List<Transaccion> listarPorEstado(Transaccion.EstadoTransaccion estado) {
         return transaccionRepository.findAll()
                 .stream()
@@ -25,21 +24,21 @@ public class TransaccionService extends BaseService<Transaccion, Long> {
                 .toList();
     }
 
-    /**
-     * Guarda o actualiza una transacción en la base de datos.
-     *
-     * @param transaccion Transacción a guardar o actualizar.
-     */
     @Transactional
     public void guardarOActualizar(Transaccion transaccion) {
         if (transaccion.getId() != null) {
             Transaccion transaccionExistente = transaccionRepository.findById(transaccion.getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Transacción no encontrada con ID: " + transaccion.getId()));
-            // Actualizar los campos necesarios
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Transacción no encontrada con ID: " + transaccion.getId()
+                    ));
+            // Actualizar campos si deseas
             transaccionExistente.setEstado(transaccion.getEstado());
             transaccionExistente.setTotal(transaccion.getTotal());
+            transaccionExistente.setPagado(transaccion.getPagado());
             transaccionExistente.setFecha(transaccion.getFecha());
             transaccionExistente.setVendedor(transaccion.getVendedor());
+            transaccionExistente.setNotas(transaccion.getNotas());
+
             transaccionRepository.save(transaccionExistente);
         } else {
             transaccionRepository.save(transaccion);

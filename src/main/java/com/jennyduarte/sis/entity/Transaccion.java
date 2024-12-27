@@ -2,6 +2,7 @@ package com.jennyduarte.sis.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,7 +14,6 @@ import java.util.List;
 @Builder
 @Table(name = "transacciones")
 public class Transaccion {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,7 +31,7 @@ public class Transaccion {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TipoTransaccion tipo;
+    private TipoTransaccion tipo; // VENTA, ALQUILER
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -41,13 +41,9 @@ public class Transaccion {
     @Builder.Default
     private BigDecimal total = BigDecimal.ZERO;
 
-    /**
-     * Aquí usamos @Builder.Default para que, si no le pasamos un valor a 'pagado'
-     * al usar el builder, se mantenga BigDecimal.ZERO en vez de null.
-     */
     @Column(nullable = false)
     @Builder.Default
-    private BigDecimal pagado = BigDecimal.ZERO;
+        private BigDecimal pagado = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "transaccion", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleTransaccion> detalles;
@@ -58,21 +54,25 @@ public class Transaccion {
         return total.subtract(pagado);
     }
 
-    public void calcularTotal() {
-        if (detalles != null) {
-            this.total = detalles.stream()
-                    .map(DetalleTransaccion::getSubtotal)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-        } else {
-            this.total = BigDecimal.ZERO;
-        }
-    }
-
     public enum TipoTransaccion {
-        VENTA, ALQUILER
+        VENTA, ALQUILER,
     }
 
     public enum EstadoTransaccion {
         PENDIENTE, COMPLETADA, CANCELADA
+    }
+
+    // Método opcional para recalcular el total en base a sus detalles
+    public void calcularTotal() {
+        if (detalles != null && !detalles.isEmpty()) {
+            BigDecimal sum = BigDecimal.ZERO;
+            for (DetalleTransaccion det : detalles) {
+                det.calcularSubtotal();
+                sum = sum.add(det.getSubtotal());
+            }
+            this.total = sum;
+        } else {
+            this.total = BigDecimal.ZERO;
+        }
     }
 }

@@ -8,20 +8,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
 </head>
 <body>
-
 <section layout:fragment="contenido">
     <div class="container mt-4">
         <h1>Listado de Transacciones</h1>
 
-        <!-- Botón para crear nueva transacción -->
         <div class="mb-3">
             <a class="btn btn-primary" th:href="@{/transacciones/crear}">
                 Nueva Transacción
             </a>
         </div>
 
-        <!-- Tabla de transacciones -->
-        <table class="table table-bordered table-striped">
+        <table class="table table-striped">
             <thead>
             <tr>
                 <th>ID</th>
@@ -37,27 +34,27 @@
             </tr>
             </thead>
             <tbody>
-            <!-- Iteramos sobre la lista de transacciones que viene del modelo -->
             <tr th:each="trans : ${transacciones}">
                 <td th:text="${trans.id}">1</td>
-                <td th:text="${#temporals.format(trans.fecha, 'yyyy-MM-dd HH:mm')}">2024-12-25 19:30</td>
-                <td th:text="${trans.cliente.nombre}">Nombre Cliente</td>
-                <td th:text="${trans.vendedor.contacto.nombre}">Nombre Vendedor</td>
+                <td th:text="${#temporals.format(trans.fecha, 'yyyy-MM-dd HH:mm')}"></td>
+                <td th:text="${trans.cliente.nombre}">Cliente</td>
+                <td th:text="${trans.vendedor.contacto.nombre}">Vendedor</td>
                 <td th:text="${trans.tipo}">VENTA</td>
                 <td th:text="${trans.estado}">PENDIENTE</td>
                 <td th:text="${trans.total}">0.00</td>
                 <td th:text="${trans.pagado}">0.00</td>
                 <td th:text="${trans.saldo}">0.00</td>
                 <td>
-                    <!-- Ejemplo de acción para ver detalle -->
-                    <a th:href="@{/transacciones/{id}(id=${trans.id})}"
-                       class="btn btn-info btn-sm">Ver Detalle</a>
+                    <a class="btn btn-info btn-sm"
+                       th:href="@{/transacciones/{id}(id=${trans.id})}">
+                        Ver Detalle
+                    </a>
+                    <!-- Otras acciones si deseas... -->
                 </td>
             </tr>
             </tbody>
         </table>
     </div>
 </section>
-
 </body>
 </html>

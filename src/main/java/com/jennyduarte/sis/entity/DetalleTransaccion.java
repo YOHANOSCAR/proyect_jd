@@ -1,4 +1,5 @@
 package com.jennyduarte.sis.entity;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,7 +28,7 @@ public class DetalleTransaccion {
     private Integer cantidad;
 
     @Column(nullable = true)
-    private BigDecimal descuento = BigDecimal.ZERO;
+    private BigDecimal descuento = BigDecimal.ZERO;  // Se asume % de descuento
 
     @Column(nullable = false)
     private BigDecimal precioUnitario;
@@ -36,8 +37,11 @@ public class DetalleTransaccion {
     private BigDecimal subtotal;
 
     public void calcularSubtotal() {
-        BigDecimal descuentoAplicado = precioUnitario.multiply(descuento.divide(BigDecimal.valueOf(100)));
-        this.subtotal = precioUnitario.subtract(descuentoAplicado).multiply(BigDecimal.valueOf(cantidad));
+        // descuento es un porcentaje, e.g. 10 -> 10%
+        BigDecimal descuentoValor = precioUnitario
+                .multiply(descuento)
+                .divide(BigDecimal.valueOf(100));
+        BigDecimal precioConDescuento = precioUnitario.subtract(descuentoValor);
+        this.subtotal = precioConDescuento.multiply(BigDecimal.valueOf(cantidad));
     }
-
 }

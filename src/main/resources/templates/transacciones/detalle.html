@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout}">
+<head>
+    <title>Detalle de Transacción</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<section layout:fragment="contenido">
+    <div class="container mt-4">
+        <h1>Detalle de Transacción</h1>
+
+        <!-- Información principal de la transacción -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <p><strong>ID Transacción:</strong>
+                    <span th:text="${transaccion.id}">1</span>
+                </p>
+                <p><strong>Fecha:</strong>
+                    <!-- Ejemplo: Formateamos la fecha con #temporals.format -->
+                    <span th:text="${#temporals.format(transaccion.fecha, 'yyyy-MM-dd HH:mm')}">2024-12-26 16:47</span>
+                </p>
+                <p><strong>Cliente:</strong>
+                    <span th:text="${transaccion.cliente.nombre}">Nombre Cliente</span>
+                </p>
+                <p><strong>Vendedor:</strong>
+                    <!-- Asumiendo que 'vendedor.contacto' existe -->
+                    <span th:text="${transaccion.vendedor.contacto.nombre}">Nombre Vendedor</span>
+                </p>
+                <p><strong>Tipo:</strong>
+                    <span th:text="${transaccion.tipo}">VENTA</span>
+                </p>
+                <p><strong>Estado:</strong>
+                    <span th:text="${transaccion.estado}">PENDIENTE</span>
+                </p>
+                <p><strong>Total:</strong>
+                    <span th:text="${transaccion.total}">0.00</span>
+                </p>
+                <p><strong>Pagado:</strong>
+                    <span th:text="${transaccion.pagado}">0.00</span>
+                </p>
+                <p><strong>Saldo:</strong>
+                    <!-- Suponiendo que en Transaccion tienes getSaldo() = total - pagado -->
+                    <span th:text="${transaccion.saldo}">0.00</span>
+                </p>
+                <p><strong>Notas:</strong>
+                    <span th:text="${transaccion.notas}">Notas de la transacción</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Detalles de la transacción (productos) -->
+        <h2>Productos</h2>
+        <table class="table table-bordered mb-4">
+            <thead>
+            <tr>
+                <th>ID Detalle</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Descuento (%)</th>
+                <th>Subtotal</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Iteramos sobre la lista 'detalles' -->
+            <tr th:each="det : ${detalles}">
+                <td th:text="${det.id}">1</td>
+                <td th:text="${det.producto.nombre}">Nombre del producto</td>
+                <td th:text="${det.cantidad}">1</td>
+                <td th:text="${det.precioUnitario}">100.00</td>
+                <td th:text="${det.descuento}">10</td>
+                <!-- 'subtotal' es @Transient, calculado en 'calcularSubtotal()' -->
+                <td th:text="${det.subtotal}">90.00</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Pagos realizados -->
+        <h2>Pagos Realizados</h2>
+        <table class="table table-striped mb-4">
+            <thead>
+            <tr>
+                <th>ID Pago</th>
+                <th>Monto</th>
+                <th>Método</th>
+                <th>Fecha</th>
+                <th>Notas</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Lista 'pagos' que pasas desde el controlador con: model.addAttribute("pagos", pagos) -->
+            <tr th:each="pago : ${pagos}">
+                <td th:text="${pago.id}">1</td>
+                <td th:text="${pago.monto}">100.00</td>
+                <td th:text="${pago.metodo}">EFECTIVO</td>
+                <td th:text="${#temporals.format(pago.fechaPago, 'yyyy-MM-dd HH:mm')}">2024-12-26 17:00</td>
+                <td th:text="${pago.notas}">Abono inicial</td>
+            </tr>
+            <!-- Si no hay pagos, la tabla quedará vacía -->
+            </tbody>
+        </table>
+
+        <!-- Botón para registrar un nuevo pago -->
+        <div class="mb-4">
+            <a class="btn btn-success"
+               th:href="@{/transacciones/{id}/nuevo-pago(id=${transaccion.id})}">
+                Registrar nuevo Pago
+            </a>
+        </div>
+
+        <!-- Botón para volver a la lista de transacciones -->
+        <div>
+            <a class="btn btn-secondary" th:href="@{/transacciones}">
+                Volver a la Lista
+            </a>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>
