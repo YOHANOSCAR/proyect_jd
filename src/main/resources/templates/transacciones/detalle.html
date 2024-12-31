@@ -112,6 +112,13 @@
                 Registrar nuevo Pago
             </a>
         </div>
+        <!-- Nuevo Botón para Generar Reporte -->
+        <a class="btn btn-primary me-2"
+           th:href="@{/transacciones/{id}/reporte(id=${transaccion.id})}"
+           target="_blank">
+            Generar Reporte
+        </a>
+
 
         <!-- Botón para volver a la lista de transacciones -->
         <div>

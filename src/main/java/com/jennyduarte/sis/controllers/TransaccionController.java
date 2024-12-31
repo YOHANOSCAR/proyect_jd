@@ -2,11 +2,14 @@ package com.jennyduarte.sis.controllers;
 
 import com.jennyduarte.sis.entity.*;
 import com.jennyduarte.sis.service.*;
+import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import com.jennyduarte.sis.service.ReportePdfService;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,6 +25,7 @@ public class TransaccionController {
     private final ContactoService contactoService;
     private final UsuarioService usuarioService;
     private final PagoService pagoService;
+    private final ReportePdfService reportePdfService;
 
     public TransaccionController(
             TransaccionService transaccionService,
@@ -29,13 +33,15 @@ public class TransaccionController {
             ProductoService productoService,
             ContactoService contactoService,
             UsuarioService usuarioService,
-            PagoService pagoService) {
+            PagoService pagoService,
+            ReportePdfService reportePdfService) {
         this.transaccionService = transaccionService;
         this.detalleTransaccionService = detalleTransaccionService;
         this.productoService = productoService;
         this.contactoService = contactoService;
         this.usuarioService = usuarioService;
         this.pagoService = pagoService;
+        this.reportePdfService = reportePdfService;
     }
 
     // ----------------------------------------------------
@@ -115,6 +121,7 @@ public class TransaccionController {
                 model.addAttribute("error", "No se pudo identificar al vendedor autenticado.");
                 return "error";
             }
+
 
             // 2. Verificar el Cliente
             Contacto cliente = contactoService.obtenerPorId(clienteId);
@@ -200,6 +207,8 @@ public class TransaccionController {
 
             // 8. Volver a guardar la transacción con total + pagado actualizados
             transaccionService.guardarOActualizar(transaccion);
+            Long transaccionId = transaccion.getId();
+
 
             // 9. Registrar el pago inicial como "Abono inicial" si es > 0
             if (montoInicialActual.compareTo(BigDecimal.ZERO) > 0) {
@@ -214,8 +223,7 @@ public class TransaccionController {
             }
 
             // 10. Redireccionar a la lista (o donde corresponda)
-            return "redirect:/transacciones/";
-
+            return "redirect:/transacciones/" + transaccionId + "/boleta";
         } catch (Exception e) {
             model.addAttribute("error", "Ocurrió un error al procesar la transacción: " + e.getMessage());
             return "error";
@@ -310,4 +318,42 @@ public class TransaccionController {
             return "error";
         }
     }
+    @GetMapping("/{id}/reporte")
+    public ResponseEntity<byte[]> generarReporte(@PathVariable Long id) {
+        try {
+            byte[] pdfBytes = reportePdfService.generarReporteTransaccion(id);
+
+            // Configurar cabeceras para que se muestre o se descargue el PDF
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            // Para mostrar en el navegador:
+            headers.setContentDisposition(ContentDisposition.inline().filename("reporte-transaccion.pdf").build());
+            // O para forzar descarga:
+            // headers.setContentDisposition(ContentDisposition.attachment().filename("reporte-transaccion.pdf").build());
+
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            // Manejo de error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
+    }
+    @GetMapping("/{id}/boleta")
+    public ResponseEntity<byte[]> generarBoleta(@PathVariable Long id) {
+        try {
+            byte[] pdfBytes = reportePdfService.generarBoleta(id);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.inline()
+                    .filename("boleta-transaccion-" + id + ".pdf").build());
+
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
+
 }
