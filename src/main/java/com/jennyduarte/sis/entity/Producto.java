@@ -43,7 +43,8 @@ public class Producto {
 
     @Enumerated(EnumType.STRING)
     private EstadoProducto estado = EstadoProducto.DISPONIBLE;
-
+    private String talla;
+    private String color;
     private BigDecimal precioVenta;
     private BigDecimal costoAlquiler;
     private Integer cantidadDisponible;

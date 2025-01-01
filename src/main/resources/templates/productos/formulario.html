@@ -11,6 +11,9 @@
     <section layout:fragment="contenido">
         <div class="container mt-5">
             <h1 th:text="${producto.id != null ? 'Editar Producto' : 'Crear Producto'}"></h1>
+            <div th:if="${error}" class="alert alert-danger" role="alert">
+                <p th:text="${error}"></p>
+            </div>
 
             <form th:action="@{/productos}" th:object="${producto}" method="post" enctype="multipart/form-data">
                 <input type="hidden" th:field="*{id}" />
@@ -24,6 +27,17 @@
                 <div class="mb-3">
                     <label for="nombre" class="form-label">Nombre</label>
                     <input type="text" id="nombre" name="nombre" th:field="*{nombre}" class="form-control" required>
+                </div>
+                <!-- Talla -->
+                <div class="mb-3">
+                    <label for="talla" class="form-label">Talla</label>
+                    <input type="text" id="talla" name="talla" th:field="*{talla}" class="form-control" />
+                </div>
+
+                <!-- Color -->
+                <div class="mb-3">
+                    <label for="color" class="form-label">Color</label>
+                    <input type="text" id="color" name="color" th:field="*{color}" class="form-control" />
                 </div>
 
                 <!-- Descripción -->

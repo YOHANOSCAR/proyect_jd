@@ -29,6 +29,9 @@ public class MovimientoInventario {
     @Column(nullable = false)
     private LocalDateTime fecha;
 
+    @Column(nullable = false)
+    private String usuario;
+
     private String motivo;
     public enum TipoMovimiento{
         ENTRADA, SALIDA, AJUSTE, DEVOLUCION

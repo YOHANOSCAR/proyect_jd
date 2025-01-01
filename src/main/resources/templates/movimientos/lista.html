@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Movimientos de Inventario</title>
+</head>
+<body>
+<h1>Movimientos de Inventario</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Producto</th>
+        <th>Tipo</th>
+        <th>Cantidad</th>
+        <th>Fecha</th>
+        <th>Motivo</th>
+        <th>Usuario</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="movimiento : ${movimientos}">
+        <td th:text="${movimiento.producto.nombre}"></td>
+        <td th:text="${movimiento.tipo}"></td>
+        <td th:text="${movimiento.cantidad}"></td>
+        <td th:text="${movimiento.fecha}"></td>
+        <td th:text="${movimiento.motivo}"></td>
+        <td th:text="${movimiento.usuario}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
