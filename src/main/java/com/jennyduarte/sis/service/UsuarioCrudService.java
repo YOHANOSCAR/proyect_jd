@@ -12,5 +12,7 @@ public class UsuarioCrudService extends BaseService<Usuario, Long> {
     public UsuarioCrudService(UsuarioRepository usuarioRepository) {
         super(usuarioRepository); // Llama al constructor de BaseService
     }
+
 }
+
 

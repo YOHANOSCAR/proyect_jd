@@ -9,9 +9,15 @@
 </head>
 <body>
 <section layout:fragment="contenido">
+
     <div class="container mt-4">
         <h1>Registrar Transacción</h1>
         <form th:action="@{/transacciones}" method="post">
+            <!-- control de errores -->
+            <div class="alert alert-danger" th:if="${error}">
+                <p th:text="${error}"></p>
+            </div>
+
             <!-- Cliente -->
             <div class="mb-3">
                 <label for="cliente" class="form-label">Cliente</label>

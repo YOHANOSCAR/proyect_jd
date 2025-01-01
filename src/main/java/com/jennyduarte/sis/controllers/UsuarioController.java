@@ -32,15 +32,8 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public String crearForm(Model model) {
         model.addAttribute("usuario", new Usuario());
-        model.addAttribute("contactos", contactoService.listarTodos());
+        model.addAttribute("contactos", contactoService.listarUsuarios()); // Filtrar contactos
         return "usuarios/formulario";
-    }
-
-    @PostMapping
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public String guardar(@ModelAttribute Usuario usuario) {
-        usuarioService.guardarUsuario(usuario);
-        return "redirect:/usuarios";
     }
 
     @GetMapping("/editar/{id}")
@@ -48,9 +41,29 @@ public class UsuarioController {
     public String editarForm(@PathVariable Long id, Model model) {
         Usuario usuario = usuarioService.obtenerPorId(id);
         model.addAttribute("usuario", usuario);
-        model.addAttribute("contactos", contactoService.listarTodos());
-        return "usuarios/formulario";
+        model.addAttribute("contactos", contactoService.listarUsuarios());
+        return "usuarios/formulario"; // Retorna el formulario con los datos del usuario
     }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public String guardar(@ModelAttribute Usuario usuario, Model model) {
+        try {
+            if (usuario.getId() == null) {
+                usuarioService.guardarUsuario(usuario);
+            } else {
+                usuarioService.actualizarUsuario(usuario);
+            }
+            return "redirect:/usuarios";
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("error", ex.getMessage());
+            model.addAttribute("usuario", usuario);
+            model.addAttribute("contactos", contactoService.listarUsuarios());
+            return "usuarios/formulario";
+        }
+    }
+
+
 
     @GetMapping("/eliminar/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")

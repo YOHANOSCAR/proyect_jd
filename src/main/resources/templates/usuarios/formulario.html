@@ -11,33 +11,60 @@
 <section layout:fragment="contenido">
 <div class="container mt-5">
     <h1 th:text="${usuario.id != null ? 'Editar Usuario' : 'Crear Usuario'}"></h1>
+    <div class="alert alert-danger" th:if="${error}">
+        <p th:text="${error}"></p>
+    </div>
+
     <form th:action="@{/usuarios}" th:object="${usuario}" method="post">
+        <input type="hidden" th:field="*{id}" />
+
         <div class="mb-3">
             <label for="contacto" class="form-label">Contacto</label>
             <select id="contacto" name="contacto.id" th:field="*{contacto.id}" class="form-select" required>
-                <option th:each="contacto : ${contactos}" th:value="${contacto.id}" th:text="${contacto.nombre}"></option>
+                <option th:each="contacto : ${contactos}"
+                        th:value="${contacto.id}"
+                        th:text="${contacto.nombre}"
+                        th:checked="${contacto.id == usuario.contacto.id}"></option>
             </select>
         </div>
+
         <div class="mb-3">
             <label for="username" class="form-label">Usuario</label>
-            <input type="text" id="username" name="username" th:field="*{username}" class="form-control" required>
+            <input type="text" id="username" name="username" th:field="*{username}" class="form-control" required />
         </div>
-        <div class="mb-3">
+
+        <!-- Campo de contraseña obligatorio al crear -->
+        <div class="mb-3" th:if="${usuario.id == null}">
             <label for="password" class="form-label">Contraseña</label>
-            <input type="password" id="password" name="password" th:field="*{password}" class="form-control" required>
+            <input type="password" id="password" name="password" th:field="*{password}" class="form-control" required />
         </div>
+
+        <!-- Campo de contraseña opcional al editar -->
+        <div class="mb-3" th:if="${usuario.id != null}">
+            <label for="password" class="form-label">Nueva Contraseña (opcional)</label>
+            <input type="password" id="password" name="password" th:field="*{password}" class="form-control" />
+        </div>
+
         <div class="mb-3">
             <label for="rol" class="form-label">Rol</label>
             <select id="rol" name="rol" th:field="*{rol}" class="form-select" required>
-                <option th:each="rol : ${T(com.jennyduarte.sis.entity.Usuario.Rol).values()}" th:value="${rol}" th:text="${rol}"></option>
+                <option th:each="rol : ${T(com.jennyduarte.sis.entity.Usuario.Rol).values()}"
+                        th:value="${rol}"
+                        th:text="${rol}"
+                        th:checked="${rol == usuario.rol}"></option>
             </select>
         </div>
+
         <div class="mb-3">
             <label for="estado" class="form-label">Estado</label>
             <select id="estado" name="estado" th:field="*{estado}" class="form-select">
-                <option th:each="estado : ${T(com.jennyduarte.sis.entity.Usuario.EstadoUsuario).values()}" th:value="${estado}" th:text="${estado}"></option>
+                <option th:each="estado : ${T(com.jennyduarte.sis.entity.Usuario.EstadoUsuario).values()}"
+                        th:value="${estado}"
+                        th:text="${estado}"
+                        th:checked="${estado == usuario.estado}"></option>
             </select>
         </div>
+
         <button type="submit" class="btn btn-primary">Guardar</button>
     </form>
 </div>

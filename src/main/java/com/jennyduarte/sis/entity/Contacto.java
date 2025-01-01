@@ -1,4 +1,5 @@
 package com.jennyduarte.sis.entity;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,10 +23,15 @@ public class Contacto {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TipoContacto tipo; // Enum: cliente, proveedor, usuario
+    private TipoContacto tipo; // Enum: CLIENTE, PROVEEDOR, USUARIO
 
     private String notas;
+
+    // Nuevos campos
+    private String razonSocial;
+    private String ruc;
+
     public enum TipoContacto{
-        CLIENTE,PROVEEDOR,USUARIO
+        CLIENTE, PROVEEDOR, USUARIO
     }
 }

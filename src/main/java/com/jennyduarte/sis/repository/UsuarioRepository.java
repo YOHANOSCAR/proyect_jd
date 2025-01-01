@@ -6,8 +6,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+
+    // Buscar usuario por username
     Optional<Usuario> findByUsername(String username);
 
-    // Método adicional para verificar existencia por username
+    // Verificar existencia por username
     boolean existsByUsername(String username);
+
+    // Buscar usuario por contacto_id
+    Optional<Usuario> findByContactoId(Long contactoId);
 }
