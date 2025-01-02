@@ -31,7 +31,6 @@ public class TransaccionService extends BaseService<Transaccion, Long> {
                     .orElseThrow(() -> new IllegalArgumentException(
                             "Transacción no encontrada con ID: " + transaccion.getId()
                     ));
-            // Actualizar campos si deseas
             transaccionExistente.setEstado(transaccion.getEstado());
             transaccionExistente.setTotal(transaccion.getTotal());
             transaccionExistente.setPagado(transaccion.getPagado());
@@ -44,4 +43,8 @@ public class TransaccionService extends BaseService<Transaccion, Long> {
             transaccionRepository.save(transaccion);
         }
     }
+    public List<Transaccion> findAll() {
+        return transaccionRepository.findAll();
+    }
+
 }

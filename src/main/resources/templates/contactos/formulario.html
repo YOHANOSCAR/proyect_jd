@@ -11,6 +11,9 @@
 <section layout:fragment="contenido">
     <div class="container mt-5">
         <h1 th:text="${entidad.id != null ? 'Editar' : 'Crear'} + ' Contacto'"></h1>
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+            <p th:text="${error}"></p>
+        </div>
         <form th:action="@{/contactos}" th:object="${entidad}" method="post" id="contactoForm">
             <input type="hidden" th:field="*{id}" />
             <!-- Campo Nombre -->

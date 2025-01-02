@@ -44,9 +44,6 @@ public class TransaccionController {
         this.reportePdfService = reportePdfService;
     }
 
-    // ----------------------------------------------------
-    // LISTAR TRANSACCIONES
-    // ----------------------------------------------------
     @GetMapping
     public String listarTransacciones(Model model) {
         List<Transaccion> transacciones = transaccionService.listarTodos();
@@ -54,9 +51,6 @@ public class TransaccionController {
         return "transacciones/lista";
     }
 
-    // ----------------------------------------------------
-    // FORMULARIO PARA CREAR UNA NUEVA TRANSACCION
-    // ----------------------------------------------------
     @GetMapping("/crear")
     public String crearTransaccionForm(Model model) {
         // Crear transacción vacía
@@ -98,9 +92,6 @@ public class TransaccionController {
         return "transacciones/formulario";
     }
 
-    // ----------------------------------------------------
-    // GUARDAR (POST) LA TRANSACCION
-    // ----------------------------------------------------
     @PostMapping
     public String guardarTransaccion(@RequestParam("clienteId") Long clienteId,
                                      @RequestParam("tipo") String tipoTransaccion,
@@ -115,7 +106,6 @@ public class TransaccionController {
                                      @RequestParam("pagado") BigDecimal pagadoRecibido,
                                      Model model) {
         try {
-            // 1. Obtener usuario (vendedor) autenticado
             Usuario vendedor = usuarioService.obtenerUsuarioAutenticado();
             if (vendedor == null) {
                 model.addAttribute("error", "No se pudo identificar al vendedor autenticado.");
@@ -123,14 +113,13 @@ public class TransaccionController {
             }
 
 
-            // 2. Verificar el Cliente
+
             Contacto cliente = contactoService.obtenerPorId(clienteId);
             if (cliente == null) {
                 model.addAttribute("error", "El cliente seleccionado no existe.");
                 return "error";
             }
 
-            // 3. Crear la Transacción y asignar datos base
             Transaccion transaccion = Transaccion.builder()
                     .cliente(cliente)
                     .vendedor(vendedor)
@@ -138,10 +127,9 @@ public class TransaccionController {
                     .tipo(Transaccion.TipoTransaccion.valueOf(tipoTransaccion))
                     .notas(notas)
                     .build();
-            // Guarda la transacción en estado inicial (aun sin total):
+
             transaccionService.guardarOActualizar(transaccion);
 
-            // 4. Calcular el total con los detalles (lo que ya tenías):
             BigDecimal totalCalculado = BigDecimal.ZERO;
             for (int i = 0; i < productoIds.size(); i++) {
                 Producto producto = productoService.obtenerPorId(productoIds.get(i));
@@ -158,7 +146,6 @@ public class TransaccionController {
                 BigDecimal descuentoVal = subtotal.multiply(desc).divide(BigDecimal.valueOf(100));
                 BigDecimal subtotalFinal = subtotal.subtract(descuentoVal);
 
-                // Guardar detalle
                 DetalleTransaccion detalle = DetalleTransaccion.builder()
                         .transaccion(transaccion)
                         .producto(producto)
@@ -171,7 +158,6 @@ public class TransaccionController {
 
                 totalCalculado = totalCalculado.add(subtotalFinal);
 
-                // Control de stock si es VENTA
                 if (transaccion.getTipo() == Transaccion.TipoTransaccion.VENTA) {
                     if (producto.getCantidadDisponible() < cant) {
                         model.addAttribute("error", "Stock insuficiente para: " + producto.getNombre());
@@ -182,35 +168,28 @@ public class TransaccionController {
                 }
             }
 
-            // 5. Asignar el total real
             BigDecimal totalFinal = (totalRecibido != null) ? totalRecibido : totalCalculado;
             transaccion.setTotal(totalFinal);
 
-            // 6. Manejar el pago inicial: "montoInicial"
-            //    Si el usuario puso algo en 'montoInicial', se lo asignamos
-            //    directamente a 'pagado'. O lo forzamos a 0 si es nulo.
             BigDecimal montoInicialActual = (montoInicial != null) ? montoInicial : BigDecimal.ZERO;
             transaccion.setPagado(montoInicialActual);
 
-            // Evitar que sobrepase el total
             if (transaccion.getPagado().compareTo(transaccion.getTotal()) > 0) {
                 transaccion.setPagado(transaccion.getTotal());
                 model.addAttribute("mensaje", "El abono ingresado excedía el total. Se ajustó automáticamente.");
             }
 
-            // 7. Actualizar estado
+
             if (transaccion.getPagado().compareTo(transaccion.getTotal()) >= 0) {
                 transaccion.setEstado(Transaccion.EstadoTransaccion.COMPLETADA);
             } else {
                 transaccion.setEstado(Transaccion.EstadoTransaccion.PENDIENTE);
             }
 
-            // 8. Volver a guardar la transacción con total + pagado actualizados
             transaccionService.guardarOActualizar(transaccion);
             Long transaccionId = transaccion.getId();
 
 
-            // 9. Registrar el pago inicial como "Abono inicial" si es > 0
             if (montoInicialActual.compareTo(BigDecimal.ZERO) > 0) {
                 Pago pagoInicial = Pago.builder()
                         .transaccion(transaccion)
@@ -230,9 +209,6 @@ public class TransaccionController {
         }
     }
 
-    // ----------------------------------------------------
-    // MOSTRAR DETALLES DE UNA TRANSACCION
-    // ----------------------------------------------------
     @GetMapping("/{id}")
     public String verDetallesTransaccion(@PathVariable Long id, Model model) {
         Transaccion transaccion = transaccionService.obtenerPorId(id);
@@ -240,7 +216,6 @@ public class TransaccionController {
             model.addAttribute("error", "La transacción no existe.");
             return "error";
         }
-
         List<DetalleTransaccion> detalles = detalleTransaccionService.listarPorTransaccion(id);
         List<Pago> pagos = pagoService.listarPorTransaccion(id);
 
@@ -257,8 +232,6 @@ public class TransaccionController {
             model.addAttribute("error", "La transacción no existe.");
             return "error";
         }
-
-        // Podrías crear un objeto Pago vacío para enlazar en la vista
         Pago nuevoPago = new Pago();
         nuevoPago.setTransaccion(transaccion);  // Asociar la transacción
 
@@ -287,7 +260,6 @@ public class TransaccionController {
                 return "error";
             }
 
-            // 1. Crear objeto Pago
             Pago pago = Pago.builder()
                     .transaccion(transaccion)
                     .monto(monto)
@@ -296,21 +268,14 @@ public class TransaccionController {
                     .notas(notas)
                     .build();
 
-            // 2. Guardar pago en BD
             pagoService.guardar(pago);
-
-            // 3. Actualizar 'pagado' en la transacción
             BigDecimal nuevoPagado = transaccion.getPagado().add(monto);
             transaccion.setPagado(nuevoPagado);
-
-            // 4. Si pagado >= total => COMPLETADA
             if (nuevoPagado.compareTo(transaccion.getTotal()) >= 0) {
                 transaccion.setEstado(Transaccion.EstadoTransaccion.COMPLETADA);
             }
-
             transaccionService.guardar(transaccion);
 
-            // Redirigir a la vista de detalles de la transacción
             return "redirect:/transacciones/" + transaccionId;
 
         } catch (Exception e) {
@@ -323,17 +288,14 @@ public class TransaccionController {
         try {
             byte[] pdfBytes = reportePdfService.generarReporteTransaccion(id);
 
-            // Configurar cabeceras para que se muestre o se descargue el PDF
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            // Para mostrar en el navegador:
+
             headers.setContentDisposition(ContentDisposition.inline().filename("reporte-transaccion.pdf").build());
-            // O para forzar descarga:
-            // headers.setContentDisposition(ContentDisposition.attachment().filename("reporte-transaccion.pdf").build());
 
             return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
         } catch (Exception e) {
-            // Manejo de error
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(null);
         }

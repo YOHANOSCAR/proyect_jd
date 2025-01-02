@@ -56,6 +56,6 @@ public class Producto {
         venta, alquiler, personalizado
     }
     public enum EstadoProducto{
-        VENTA,ALQUILER, DISPONIBLE, PERZONALIZADO
+        VENTA,ALQUILER, DISPONIBLE, INDISPONIBLE
     }
 }

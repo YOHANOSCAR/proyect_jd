@@ -21,4 +21,7 @@ public class DetalleTransaccionService extends BaseService<DetalleTransaccion, L
                 .filter(d -> d.getTransaccion().getId().equals(transaccionId))
                 .toList();
     }
+    public List<DetalleTransaccion> findAll() {
+        return detalleRepository.findAll();
+    }
 }

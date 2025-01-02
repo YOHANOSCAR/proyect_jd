@@ -19,9 +19,13 @@
   <div class="container-fluid">
     <a class="navbar-brand fw-bold" href="#">Control Jenny Duarte</a>
     <div class="collapse navbar-collapse justify-content-end">
-        <span class="navbar-text">
-          Usuario actual: <strong th:text="${usuarioActual}">Nombre Usuario</strong>
-        </span>
+<span class="navbar-text">
+  Usuario actual: <strong th:text="${usuarioActual}">Nombre Usuario</strong>
+</span>
+
+        <form th:action="@{/logout}" method="post" class="ms-3">
+          <button type="submit" class="btn btn-outline-danger">Cerrar Sesión</button>
+        </form>
     </div>
   </div>
 </nav>
@@ -49,7 +53,7 @@
         <a class="nav-link" th:href="@{/transacciones}">Transacciones</a>
       </li>
       <li class="nav-item mb-2">
-        <a class="nav-link" th:href="@{/alquiler}">Alquiler</a>
+        <a class="nav-link" th:href="@{/movimientos}">Movimientos</a>
       </li>
     </ul>
   </div>

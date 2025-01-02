@@ -30,13 +30,11 @@ public class MovimientoInventarioService {
                 .cantidad(cantidad)
                 .fecha(LocalDateTime.now())
                 .motivo(motivo)
-                .usuario(usuario) // Incluye el usuario autenticado
+                .usuario(usuario)
                 .build();
 
         return movimientoInventarioRepository.save(movimiento);
     }
-
-    // Listar todos los movimientos de inventario
     public Iterable<MovimientoInventario> listarTodos() {
         return movimientoInventarioRepository.findAll();
     }
@@ -45,9 +43,9 @@ public class MovimientoInventarioService {
     private String obtenerUsuarioActual() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            return authentication.getName(); // Retorna el username del usuario autenticado
+            return authentication.getName();
         }
-        return "Usuario desconocido"; // Valor por defecto si no hay un usuario autenticado
+        return "Usuario desconocido";
     }
     public boolean existenMovimientosAsociados(Producto producto) {
         return movimientoInventarioRepository.existsByProducto(producto);

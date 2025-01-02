@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final UsuarioService usuarioService;
-    private final PasswordEncoder passwordEncoder; // Inyectado automáticamente
+    private final PasswordEncoder passwordEncoder;
 
     public SecurityConfig(UsuarioService usuarioService, PasswordEncoder passwordEncoder) {
         this.usuarioService = usuarioService;
@@ -23,7 +23,7 @@ public class SecurityConfig {
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(usuarioService);
-        authProvider.setPasswordEncoder(passwordEncoder); // Usa el PasswordEncoder inyectado
+        authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;
     }
 
@@ -32,15 +32,13 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/error", "/css/**", "/layout/**",
-                                "/js/**", "/registro", "/resources/**",
-                                "/contactos/**", "/usuarios/**", "/productos/**"
-                        ).permitAll()
-                        .requestMatchers("/dashboard/**","/transacciones/**").hasAnyRole("ADMINISTRADOR", "VENDEDOR")
+                                "/js/**", "/registro", "/resources/**", "/contactos/**").permitAll()
+                        .requestMatchers("/transacciones/**", "/contactos/crear","/dashboard/**", "/resources/**").hasAnyRole("VENDEDOR", "ADMINISTRADOR")
                         .anyRequest().hasRole("ADMINISTRADOR")
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .loginProcessingUrl("/login") // <-- Asegurarse de especificarlo
+                        .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
@@ -52,7 +50,5 @@ public class SecurityConfig {
                 );
         return http.build();
     }
-
-
 
 }

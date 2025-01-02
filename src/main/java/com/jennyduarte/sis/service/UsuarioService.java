@@ -24,14 +24,12 @@
             this.usuarioRepository = usuarioRepository;
             this.passwordEncoder = passwordEncoder;
         }
-    
-        // **Lógica de Autenticación**
+
         @Override
         public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
             Usuario usuario = usuarioRepository.findByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
-    
-            // Verificar que el usuario está activo
+
             if (usuario.getEstado() != Usuario.EstadoUsuario.ACTIVO) {
                 throw new UsernameNotFoundException("El usuario está inactivo: " + username);
             }
@@ -41,8 +39,7 @@
                     .roles(usuario.getRol().name()) // Se pasa el rol con el prefijo
                     .build();
         }
-    
-        // **Operaciones CRUD**
+
         public List<Usuario> listarTodos() {
             return usuarioRepository.findAll();
         }
@@ -53,13 +50,12 @@
         }
 
         public Usuario guardarUsuario(Usuario usuario) {
-            // Verificar si el contacto ya está asociado a otro usuario
+
             Usuario existente = usuarioRepository.findByContactoId(usuario.getContacto().getId()).orElse(null);
             if (existente != null) {
                 throw new IllegalArgumentException("El contacto ya está asociado a otro usuario.");
             }
 
-            // Encriptar la contraseña antes de guardar
             usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
             return usuarioRepository.save(usuario);
         }
@@ -73,13 +69,11 @@
                 throw new IllegalArgumentException("El contacto ya está asociado a otro usuario.");
             }
 
-            // Actualizar los datos del usuario
             existente.setContacto(usuario.getContacto());
             existente.setUsername(usuario.getUsername());
             existente.setRol(usuario.getRol());
             existente.setEstado(usuario.getEstado());
 
-            // Actualizar la contraseña solo si se proporciona una nueva
             if (usuario.getPassword() != null && !usuario.getPassword().isEmpty()) {
                 existente.setPassword(passwordEncoder.encode(usuario.getPassword()));
             }
@@ -98,8 +92,7 @@
             return usuarioRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado con username: " + username));
         }
-    
-        // **Obtener Usuario Autenticado**
+
         public Usuario obtenerUsuarioAutenticado() {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {

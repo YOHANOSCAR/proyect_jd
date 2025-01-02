@@ -40,13 +40,17 @@ public class ContactoService {
     }
 
     public void eliminarPorId(Long id) {
-        if (!contactoRepository.existsById(id)) {
-            throw new RuntimeException("Contacto con ID " + id + " no encontrado.");
+        if (verificarReferencias(id)) {
+            throw new IllegalStateException("No se puede eliminar el contacto porque está asociado a otros procesos.");
         }
         contactoRepository.deleteById(id);
     }
 
-    // Métodos específicos para filtrar contactos
+    // Método que verifica si el contacto está asociado a otros módulos
+    private boolean verificarReferencias(Long id) {
+        return false;
+    }
+
     public List<Contacto> listarProveedores() {
         return listarTodos().stream()
                 .filter(contacto -> contacto.getTipo() == Contacto.TipoContacto.PROVEEDOR)

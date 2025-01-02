@@ -1,54 +1,107 @@
-document.addEventListener("DOMContentLoaded", function () {
-    // Aquí puedes incluir la lógica para inicializar tus gráficas Chart.js u otras funcionalidades
-    // Ejemplo genérico:
-    const ctxProductosVendidos = document.getElementById('productosVendidosChart');
-    const productosVendidosChart = new Chart(ctxProductosVendidos, {
+/* dashboard.js */
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    // ------------------------------------------------------------------
+    // 1) Cantidades vendidas (semana) - sin cambios
+    var mapCantidadesSemanal = /*[[${cantidadesVendidasSemanal}]]*/ {};
+    var labelsCantSem = Object.keys(mapCantidadesSemanal);
+    var dataCantSem = Object.values(mapCantidadesSemanal);
+
+    const ctxCantSem = document.getElementById('chartCantidadesSemana');
+    new Chart(ctxCantSem, {
         type: 'bar',
         data: {
-            labels: ['Prod A', 'Prod B', 'Prod C'],
+            labels: labelsCantSem,
             datasets: [{
-                label: 'Cantidad Vendida',
-                data: [10, 20, 30],
+                label: 'Productos Vendidos (Semana)',
+                data: dataCantSem,
                 backgroundColor: 'rgba(54, 162, 235, 0.7)'
             }]
         }
+        // Puedes añadir opciones si quieres: options: {...}
     });
 
-    const ctxGanancias = document.getElementById('gananciasProductoChart');
-    const gananciasProductoChart = new Chart(ctxGanancias, {
-        type: 'line',
+
+    // ------------------------------------------------------------------
+    // 2) GANANCIAS: DOUGHNUT con select "Semanal" / "Mensual"
+    var mapGananciasSem = /*[[${gananciasSemanales}]]*/ {};
+    var mapGananciasMes = /*[[${gananciasMensuales}]]*/ {};
+
+    // Consolidar en un objeto dataGanancias
+    var dataGanancias = {
+        semanal: mapGananciasSem,
+        mensual: mapGananciasMes
+    };
+
+    // Función auxiliar para convertir map => array => ordenar => {labels, values}
+    function getSortedData(mapObject) {
+        let entries = Object.entries(mapObject);
+        // Ordenar desc por valor
+        entries.sort((a, b) => b[1] - a[1]);
+        return {
+            labels: entries.map(e => e[0]),
+            values: entries.map(e => e[1])
+        };
+    }
+
+    // Iniciar con "semanal"
+    let inicialGan = getSortedData(dataGanancias.semanal);
+
+    const ctxGan = document.getElementById('chartGanancias');
+    const chartGanancias = new Chart(ctxGan, {
+        type: 'doughnut', // <--- Tipo DOUGHNUT
         data: {
-            labels: ['Prod A', 'Prod B', 'Prod C'],
+            labels: inicialGan.labels,
             datasets: [{
                 label: 'Ganancias',
-                data: [100, 200, 150],
-                borderColor: 'rgba(255, 99, 132, 0.7)',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)'
+                data: inicialGan.values,
+                backgroundColor: [
+                    // Colores para cada sector
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 159, 64, 0.7)'
+                ]
             }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
         }
     });
 
-    const ctxVentasSemanales = document.getElementById('ventasSemanalesChart');
-    const ventasSemanalesChart = new Chart(ctxVentasSemanales, {
+    // Al cambiar el select #filtroGanancias => "semanal" o "mensual"
+    document.getElementById('filtroGanancias').addEventListener('change', function(e) {
+        let periodo = e.target.value; // 'semanal' | 'mensual'
+        let sorted = getSortedData(dataGanancias[periodo]);
+
+        chartGanancias.data.labels = sorted.labels;
+        chartGanancias.data.datasets[0].data = sorted.values;
+        chartGanancias.update();
+    });
+
+
+    // ------------------------------------------------------------------
+    // 3) Ventas Semanales (importe total) - sin cambios
+    var mapVentasSem = /*[[${ventasPorSemana}]]*/ {};
+    var labelsVSem = Object.keys(mapVentasSem);
+    var dataVSem = Object.values(mapVentasSem);
+
+    const ctxVSem = document.getElementById('chartVentasSemanales');
+    new Chart(ctxVSem, {
         type: 'bar',
         data: {
-            labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+            labels: labelsVSem,
             datasets: [{
-                label: 'Ventas',
-                data: [5, 10, 7, 12, 15, 9, 4],
+                label: 'Ventas Semanales (importe)',
+                data: dataVSem,
                 backgroundColor: 'rgba(75, 192, 192, 0.7)'
             }]
         }
+        // Igualmente, podrías agregar options: {...}
     });
 
-    // Ejemplo de manejo de filtros
-    document.getElementById('filtroCantidades').addEventListener('change', function() {
-        // Aquí puedes actualizar la gráfica según el filtro seleccionado
-        console.log('Filtro cantidades:', this.value);
-    });
-
-    document.getElementById('filtroGanancias').addEventListener('change', function() {
-        // Aquí puedes actualizar la gráfica según el filtro seleccionado
-        console.log('Filtro ganancias:', this.value);
-    });
 });

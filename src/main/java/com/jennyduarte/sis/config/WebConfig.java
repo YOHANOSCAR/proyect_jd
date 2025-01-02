@@ -10,7 +10,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Sirve las imágenes almacenadas en /var/uploads/ desde la URL /images/
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("file:/var/uploads/");
     }

@@ -73,30 +73,29 @@ public class ReportePdfService {
         document.add(new Paragraph("Notas: " + (transaccion.getNotas() == null ? "" : transaccion.getNotas())));
         document.add(new Paragraph(" "));
 
-        // 7) Crear una tabla para los detalles
-        PdfPTable tablaDetalles = new PdfPTable(5);
+// Reemplace el bloque donde se define la tabla de detalles
+        PdfPTable tablaDetalles = new PdfPTable(4); // Cambia a 4 columnas
         tablaDetalles.setWidthPercentage(100);
-        tablaDetalles.setWidths(new float[]{ 2f, 4f, 2f, 2f, 2f });
+        tablaDetalles.setWidths(new float[]{2f, 4f, 2f, 2f}); // Ajusta los anchos de las columnas
 
-        // Encabezados
+// Encabezados de la tabla (sin "Subtotal")
         tablaDetalles.addCell(crearCeldaTitulo("Producto"));
         tablaDetalles.addCell(crearCeldaTitulo("Descripción"));
         tablaDetalles.addCell(crearCeldaTitulo("Cantidad"));
         tablaDetalles.addCell(crearCeldaTitulo("Precio Unit."));
-        tablaDetalles.addCell(crearCeldaTitulo("Subtotal"));
 
-        // Llenar con los datos
+// Llenar con los datos (sin agregar la columna "Subtotal")
         for (DetalleTransaccion det : detalles) {
             tablaDetalles.addCell(det.getProducto().getNombre());
             tablaDetalles.addCell(det.getProducto().getDescripcion()); // Asumiendo que tienes un campo 'descripcion'
             tablaDetalles.addCell(String.valueOf(det.getCantidad()));
             tablaDetalles.addCell(String.valueOf(det.getPrecioUnitario()));
-            tablaDetalles.addCell(String.valueOf(det.getSubtotal()));
         }
 
-        // Agregar la tabla al PDF
+// Agregar la tabla al PDF
         document.add(tablaDetalles);
         document.add(new Paragraph(" "));
+
 
         // 8) Tabla de pagos (opcional)
         if (pagos != null && !pagos.isEmpty()) {

@@ -20,8 +20,6 @@ public class ProductoService {
         this.productoRepository = productoRepository;
         this.movimientoInventarioService = movimientoInventarioService;
     }
-
-    // Listar todos los productos
     public List<Producto> listarTodos() {
         List<Producto> productos = productoRepository.findAll();
         if (productos.isEmpty()) {
@@ -29,14 +27,10 @@ public class ProductoService {
         }
         return productos;
     }
-
-    // Obtener un producto por ID
     public Producto obtenerPorId(Long id) {
         return productoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Producto con ID " + id + " no encontrado."));
     }
-
-    // Guardar o actualizar un producto
     public Producto guardar(Producto producto) {
         boolean esNuevo = producto.getId() == null;
         Producto guardado = productoRepository.save(producto);
@@ -51,17 +45,16 @@ public class ProductoService {
         return guardado;
     }
 
-    // Eliminar un producto
+
     public void eliminar(Long id) {
         Producto producto = obtenerPorId(id);
 
-        // Verificar si el producto tiene movimientos asociados
+
         boolean tieneReferencias = movimientoInventarioService.existenMovimientosAsociados(producto);
         if (tieneReferencias) {
             throw new IllegalStateException("No se puede eliminar el producto porque tiene movimientos asociados.");
         }
 
-        // Registrar movimiento de salida antes de eliminar
         movimientoInventarioService.registrarMovimiento(
                 producto,
                 MovimientoInventario.TipoMovimiento.SALIDA,
@@ -71,19 +64,16 @@ public class ProductoService {
 
         productoRepository.delete(producto);
     }
-
-
-    // Filtrar productos por proveedor
     public List<Producto> listarPorProveedor(Long proveedorId) {
         return productoRepository.findAll().stream()
                 .filter(producto -> producto.getProveedor() != null && producto.getProveedor().getId().equals(proveedorId))
                 .collect(Collectors.toList());
     }
 
-    // Filtrar productos por categoría
     public List<Producto> listarPorCategoria(Long categoriaId) {
         return productoRepository.findAll().stream()
                 .filter(producto -> producto.getCategoria() != null && producto.getCategoria().getId().equals(categoriaId))
                 .collect(Collectors.toList());
     }
+
 }

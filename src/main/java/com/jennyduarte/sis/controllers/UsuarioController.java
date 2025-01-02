@@ -67,8 +67,16 @@ public class UsuarioController {
 
     @GetMapping("/eliminar/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public String eliminar(@PathVariable Long id) {
-        usuarioService.eliminarUsuario(id);
+    public String eliminar(@PathVariable Long id, Model model) {
+        try {
+            usuarioService.eliminarUsuario(id);
+        } catch (Exception e) {
+            model.addAttribute("mensajeError", "No se puede eliminar el usuario porque está asociado a otros procesos.");
+            model.addAttribute("usuarios", usuarioService.listarTodos());
+            return "usuarios/lista";
+        }
+
         return "redirect:/usuarios";
     }
+
 }
